@@ -31,6 +31,7 @@ EnableExtraPlatformsInSDK()
     dotnet --list-sdks
     SDK_PATH=$(dotnet --list-sdks | grep -E '^8\.[0-9]+\.[0-9]+' | head -1 | sed 's/\(8\.[0-9]*\.[0-9]*\).*\[\(.*\)\]/\2\/\1/g')
     BUNDLEDVERSIONS="${SDK_PATH}/Microsoft.NETCoreSdk.BundledVersions.props"
+    echo "BUNDLEDVERSIONS=$BUNDLEDVERSIONS"
     if grep -q freebsd-x64 $BUNDLEDVERSIONS; then
         echo "Extra platforms already enabled"
     else
