@@ -414,16 +414,16 @@ then
 
     if [[ -z "$RID" || -z "$FRAMEWORK" ]];
     then
-        Package "net8.0" "win-x64"
-        Package "net8.0" "win-x86"
+#        Package "net8.0" "win-x64"
+#        Package "net8.0" "win-x86"
         Package "net8.0" "linux-x64"
         Package "net8.0" "linux-musl-x64"
         Package "net8.0" "linux-arm64"
         Package "net8.0" "linux-musl-arm64"
         Package "net8.0" "linux-arm"
         Package "net8.0" "linux-musl-arm"
-        Package "net8.0" "osx-x64"
-        Package "net8.0" "osx-arm64"
+#        Package "net8.0" "osx-x64"
+#        Package "net8.0" "osx-arm64"
         if [ "$ENABLE_EXTRA_PLATFORMS" = "YES" ];
         then
             Package "net8.0" "freebsd-x64"
