@@ -102,7 +102,6 @@ jobs:
       - name: Make Test Binaries Executable
         shell: bash
         run: |
-          chmod +x _tests/ffprobe
           find _tests -name "Prowlarr.Test.Dummy" -exec chmod +x {} \;
           chmod +x _tests/test.sh
 
@@ -161,7 +160,6 @@ jobs:
       - name: Make Test Binaries Executable
         shell: bash
         run: |
-          chmod +x _tests/ffprobe
           find _tests -name "Prowlarr.Test.Dummy" -exec chmod +x {} \;
           chmod +x _tests/test.sh
 
@@ -211,7 +209,6 @@ jobs:
       - name: Make Test Binaries Executable
         shell: bash
         run: |
-          chmod +x _tests/ffprobe
           find _tests -name "Prowlarr.Test.Dummy" -exec chmod +x {} \;
           chmod +x _tests/test.sh
           chmod +x ./bin/Prowlarr
@@ -283,7 +280,6 @@ jobs:
       - name: Make Test Binaries Executable
         shell: bash
         run: |
-          chmod +x _tests/ffprobe
           find _tests -name "Prowlarr.Test.Dummy" -exec chmod +x {} \;
           chmod +x _tests/test.sh
           chmod +x ./bin/Prowlarr
@@ -334,7 +330,6 @@ jobs:
       - name: Make Test Binaries Executable
         shell: bash
         run: |
-          chmod +x _tests/ffprobe
           find _tests -name "Prowlarr.Test.Dummy" -exec chmod +x {} \;
           chmod +x _tests/test.sh
           chmod +x ./bin/Prowlarr
@@ -380,7 +375,6 @@ jobs:
       - name: Make Binaries Executable
         shell: bash
         run: |
-          find . -name "ffprobe" -exec chmod a+x {} \;
           find . -name "Prowlarr" -exec chmod a+x {} \;
           find . -name "Prowlarr.Update" -exec chmod a+x {} \;
 
