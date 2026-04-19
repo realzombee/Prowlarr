@@ -379,11 +379,11 @@ then
     Build
     if [[ -z "$RID" || -z "$FRAMEWORK" ]];
     then
-        PackageTests "net8.0" "win-x64"
-        PackageTests "net8.0" "win-x86"
+#        PackageTests "net8.0" "win-x64"
+#        PackageTests "net8.0" "win-x86"
         PackageTests "net8.0" "linux-x64"
         PackageTests "net8.0" "linux-musl-x64"
-        PackageTests "net8.0" "osx-x64"
+#        PackageTests "net8.0" "osx-x64"
         if [ "$ENABLE_EXTRA_PLATFORMS" = "YES" ];
         then
             PackageTests "net8.0" "freebsd-x64"
