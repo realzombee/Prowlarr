@@ -81,6 +81,24 @@ namespace NzbDrone.Host
                     .AllowAnyHeader());
             });
 
+            var cacheTtl = int.TryParse(
+                Environment.GetEnvironmentVariable("CACHE_TTL_MINS"),
+                out var minutes)
+                ? minutes
+                : 10;
+
+            var cacheSize = int.TryParse(
+                Environment.GetEnvironmentVariable("CACHE_MAX_SIZE_MB"),
+                out var mega)
+                ? mega
+                : 100;
+
+            services.AddOutputCache(options =>
+            {
+                options.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(cacheTtl);
+                options.SizeLimit = cacheSize * 1024 * 1024;
+            });
+
             services
             .AddControllers(options =>
             {
@@ -270,6 +288,7 @@ namespace NzbDrone.Host
 
             app.UseRouting();
             app.UseCors();
+            app.UseOutputCache();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCompression();
