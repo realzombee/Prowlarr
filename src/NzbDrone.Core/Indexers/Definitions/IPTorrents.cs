@@ -199,6 +199,28 @@ namespace NzbDrone.Core.Indexers.Definitions
                 qc.Add("free", "on");
             }
 
+            if (!searchCriteria.IsRssSearch)
+            {
+                switch (Settings.SearchSortBy)
+                {
+                    case (int)IPTorrentsSort.Seeders:
+                        qc.Add("o", "seeders");
+                        break;
+                    case (int)IPTorrentsSort.Leechers:
+                        qc.Add("o", "leechers");
+                        break;
+                    case (int)IPTorrentsSort.Snatches:
+                        qc.Add("o", "completed");
+                        break;
+                    case (int)IPTorrentsSort.Size:
+                        qc.Add("o", "size");
+                        break;
+                    case (int)IPTorrentsSort.Name:
+                        qc.Add("o", "name");
+                        break;
+                }
+            }
+
             if (imdbId.IsNotNullOrWhiteSpace())
             {
                 // ipt uses sphinx, which supports boolean operators and grouping
@@ -432,9 +454,33 @@ namespace NzbDrone.Core.Indexers.Definitions
         [FieldDefinition(4, Label = "IndexerSettingsFreeleechOnly", Type = FieldType.Checkbox, HelpText = "IndexerIPTorrentsSettingsFreeleechOnlyHelpText")]
         public bool FreeLeechOnly { get; set; }
 
+        [FieldDefinition(5, Label = "IndexerIPTorrentsSettingsSearchSortBy", Type = FieldType.Select, SelectOptions = typeof(IPTorrentsSort), HelpText = "IndexerIPTorrentsSettingsSearchSortByHelpText")]
+        public int SearchSortBy { get; set; }
+
         public override NzbDroneValidationResult Validate()
         {
             return new NzbDroneValidationResult(Validator.Validate(this));
         }
+    }
+
+    public enum IPTorrentsSort
+    {
+        [FieldOption(Label = "Default", Hint = "Site default order (most recent first)")]
+        Default = 0,
+
+        [FieldOption(Label = "Seeders", Hint = "Most seeders first")]
+        Seeders = 1,
+
+        [FieldOption(Label = "Leechers", Hint ="Most leechers first")]
+        Leechers = 2,
+
+        [FieldOption(Label = "Snatches", Hint = "Most snatches first")]
+        Snatches = 3,
+
+        [FieldOption(Label = "Size", Hint = "Largest first")]
+        Size = 4,
+
+        [FieldOption(Label = "Name", Hint = "Ordered alphabetically")]
+        Name = 5
     }
 }

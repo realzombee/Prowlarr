@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using FluentValidation.Results;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 
@@ -165,6 +166,11 @@ namespace NzbDrone.Core.Applications.Mylar
                 .Accept(HttpAccept.Json)
                 .AddQueryParam("cmd", command)
                 .AddQueryParam("apikey", settings.ApiKey);
+
+            if (settings.AuthUsername.IsNotNullOrWhiteSpace() || settings.AuthPassword.IsNotNullOrWhiteSpace())
+            {
+                requestBuilder.NetworkCredential = new BasicNetworkCredential(settings.AuthUsername, settings.AuthPassword);
+            }
 
             if (parameters != null)
             {

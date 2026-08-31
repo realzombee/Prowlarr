@@ -82,7 +82,7 @@
     "Backups": "Sao lưu",
     "BeforeUpdate": "Trước khi cập nhật",
     "CertificateValidationHelpText": "Thay đổi cách xác thực chứng chỉ HTTPS nghiêm ngặt",
-    "About": "Trong khoảng",
+    "About": "Về chúng tôi",
     "AcceptConfirmationModal": "Phương thức xác nhận chấp nhận",
     "Actions": "Hành động",
     "Added": "Thêm",
@@ -442,5 +442,10 @@
     "SyncProfiles": "Chỉnh sửa hồ sơ độ trễ",
     "Auth": "Tự động",
     "MovieSearchTypes": "Tìm kiếm phim hàng loạt",
-    "FilterPlaceHolder": "Xóa trình lập chỉ mục"
+    "FilterPlaceHolder": "Xóa trình lập chỉ mục",
+    "ApplicationURL": "URL của ứng dụng",
+    "PrioritySettings": "Ưu tiên: {0}",
+    "TheLogLevelDefault": "Mức nhật ký mặc định là 'Thông tin' và có thể được thay đổi trong",
+    "WouldYouLikeToRestoreBackup": "Bạn có muốn khôi phục bản sao lưu {0} không?",
+    "Any": "bất kỳ"
 }

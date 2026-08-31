@@ -1,7 +1,7 @@
 {
     "About": "关于",
     "AcceptConfirmationModal": "接受确认对话框",
-    "Actions": "动作",
+    "Actions": "操作",
     "Add": "添加",
     "AddApplication": "添加应用程序",
     "AddCustomFilter": "添加自定义过滤器",
@@ -24,7 +24,7 @@
     "ApiKey": "API 密钥",
     "ApiKeyValidationHealthCheckMessage": "请将API密钥更新为至少 {length} 个字符长。您可以通过设置或配置文件完成此操作",
     "AppDataDirectory": "AppData 目录",
-    "AppDataLocationHealthCheckMessage": "为防止在更新时删除 AppData，更新将无法进行",
+    "AppDataLocationHealthCheckMessage": "为防止在更新时删除应用数据，更新将无法进行",
     "AppProfileInUse": "正在使用的应用程序配置文件",
     "AppProfileSelectHelpText": "应用程序配置用于控制应用程序同步设置 RSS、自动搜索和交互式搜索设置",
     "AppSettingsSummary": "配置{appName}与PVR程序交互方式的应用和设置",
@@ -754,7 +754,7 @@
     "IndexerPassThePopcornSettingsFreeleechOnlyHelpText": "只搜索免费发布",
     "IndexerFileListSettingsFreeleechOnlyHelpText": "只搜索免费发布",
     "IndexerFileListSettingsUsernameHelpText": "网站用户名",
-    "IndexerBeyondHDSettingsRefundOnlyHelpText": "Search refund only",
+    "IndexerBeyondHDSettingsRefundOnlyHelpText": "仅搜索退款记录",
     "DownloadClientUTorrentProviderMessage": "uTorrent 曾经含有挖矿行为、恶意软件和广告，我们强烈建议你选择其他客户端。",
     "IndexerId": "索引器",
     "IndexerSettingsPasskey": "通行密钥",
@@ -803,5 +803,8 @@
     "PreferMagnetUrl": "磁力链接优先",
     "PreferMagnetUrlHelpText": "若开启，该索引器将优先使用磁力链接，种子链接作为备用",
     "ProwlarrDownloadClientsAlert": "如果你想直接在 {appName} 中搜索，你需要添加下载管理器，否则你不需要在此添加。你的程序中的搜索行为将使用它自己的下载管理器配置。",
-    "ProwlarrDownloadClientsInAppOnlyAlert": "下载管理器仅对 {appName} 中搜索有效，而不会同步到其他程序中。目前没有添加此功能的计划。"
+    "ProwlarrDownloadClientsInAppOnlyAlert": "下载管理器仅对 {appName} 中搜索有效，而不会同步到其他程序中。目前没有添加此功能的计划。",
+    "IndexerNewznabSettingsAdditionalParametersHelpText": "額外的 Newznab 參數（例如 `&t=search&cat=2000,2010&extended=1`）",
+    "IndexerSettingsApiUser": "API 使用者",
+    "ApplicationAuthPassword": "密码"
 }

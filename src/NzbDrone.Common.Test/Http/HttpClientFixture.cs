@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using NLog;
@@ -360,6 +362,28 @@ namespace NzbDrone.Common.Test.Http
             var response = Subject.Get<HttpBinResource>(request);
 
             response.Resource.Headers[header].ToString().Should().Be(value);
+        }
+
+        [Test]
+        public async Task should_send_basic_auth_header_as_utf8()
+        {
+            var username = "tèst";
+            var password = "pâsswörd_ș";
+
+            var request = new HttpRequest($"https://{_httpBinHost}/get")
+            {
+                Credentials = new BasicNetworkCredential(username, password)
+            };
+
+            var response = await Subject.GetAsync<HttpBinResource>(request);
+
+            response.Resource.Headers.Should().ContainKey("Authorization");
+
+            var authHeader = response.Resource.Headers["Authorization"].ToString();
+            var encodedPart = authHeader!.Split(' ', 2).Last();
+            var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encodedPart));
+
+            decoded.Should().Be($"{username}:{password}");
         }
 
         [Test]
@@ -797,8 +821,8 @@ namespace NzbDrone.Common.Test.Http
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
             try
             {
-                // the date is bad in the below - should be 13-Jul-2026
-                var malformedCookie = @"__cfduid=d29e686a9d65800021c66faca0a29b4261436890790; expires=Mon, 13-Jul-26 16:19:50 GMT; path=/; HttpOnly";
+                // the date is bad in the below - should be 16-Jul-2046
+                var malformedCookie = @"__cfduid=d29e686a9d65800021c66faca0a29b4261436890790; expires=Mon, 16-Jul-46 16:19:50 GMT; path=/; HttpOnly";
                 var requestSet = new HttpRequestBuilder($"https://{_httpBinHost}/response-headers")
                     .AddQueryParam("Set-Cookie", malformedCookie)
                     .Build();
@@ -806,7 +830,7 @@ namespace NzbDrone.Common.Test.Http
                 requestSet.AllowAutoRedirect = false;
                 requestSet.StoreResponseCookie = true;
 
-                var responseSet = Subject.Get(requestSet);
+                Subject.Get(requestSet);
 
                 var request = new HttpRequest($"https://{_httpBinHost}/get");
 

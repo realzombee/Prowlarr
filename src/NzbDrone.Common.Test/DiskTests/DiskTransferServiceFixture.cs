@@ -541,6 +541,21 @@ namespace NzbDrone.Common.Test.DiskTests
         }
 
         [Test]
+        public void TransferFile_should_find_files_with_multiple_slashes_within_their_path()
+        {
+            WithRealDiskProvider();
+
+            var root = GetFilledTempFolder();
+            var rootDir = root.FullName;
+            var from = Path.Combine(rootDir, "source-file");
+            var toRootDir = rootDir.Replace(Path.DirectorySeparatorChar.ToString(), new string(Path.DirectorySeparatorChar, 3));
+            var to = Path.Combine(toRootDir, "destination-file");
+            File.WriteAllText(from, "Source file");
+            var mode = Subject.TransferFile(from, to, TransferMode.Copy);
+            mode.Should().Be(TransferMode.Copy);
+        }
+
+        [Test]
         public void should_throw_if_destination_is_readonly()
         {
             Mocker.GetMock<IDiskProvider>()
@@ -927,7 +942,7 @@ namespace NzbDrone.Common.Test.DiskTests
             var sourceFiles = Directory.GetFileSystemEntries(source, "*", SearchOption.AllDirectories).Select(v => v.Substring(source.Length + 1)).ToArray();
             var destFiles = Directory.GetFileSystemEntries(destination, "*", SearchOption.AllDirectories).Select(v => v.Substring(destination.Length + 1)).ToArray();
 
-            CollectionAssert.AreEquivalent(sourceFiles, destFiles);
+            Assert.That(sourceFiles, Is.EquivalentTo(destFiles));
         }
 
         private void VerifyMoveFolder(string source, string from, string destination)
@@ -937,7 +952,7 @@ namespace NzbDrone.Common.Test.DiskTests
             var sourceFiles = Directory.GetFileSystemEntries(source, "*", SearchOption.AllDirectories).Select(v => v.Substring(source.Length + 1)).ToArray();
             var destFiles = Directory.GetFileSystemEntries(destination, "*", SearchOption.AllDirectories).Select(v => v.Substring(destination.Length + 1)).ToArray();
 
-            CollectionAssert.AreEquivalent(sourceFiles, destFiles);
+            Assert.That(sourceFiles, Is.EquivalentTo(destFiles));
         }
 
         private void VerifyDeletedFile(string filePath)

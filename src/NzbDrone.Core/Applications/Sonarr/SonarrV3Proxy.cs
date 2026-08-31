@@ -5,6 +5,7 @@ using System.Net.Http;
 using FluentValidation.Results;
 using Newtonsoft.Json;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 
@@ -195,11 +196,17 @@ namespace NzbDrone.Core.Applications.Sonarr
         {
             var baseUrl = settings.BaseUrl.TrimEnd('/');
 
-            var request = new HttpRequestBuilder(baseUrl)
+            var requestBuilder = new HttpRequestBuilder(baseUrl)
                 .Resource(resource)
                 .Accept(HttpAccept.Json)
-                .SetHeader("X-Api-Key", settings.ApiKey)
-                .Build();
+                .SetHeader("X-Api-Key", settings.ApiKey);
+
+            if (settings.AuthUsername.IsNotNullOrWhiteSpace() || settings.AuthPassword.IsNotNullOrWhiteSpace())
+            {
+                requestBuilder.NetworkCredential = new BasicNetworkCredential(settings.AuthUsername, settings.AuthPassword);
+            }
+
+            var request = requestBuilder.Build();
 
             request.Headers.ContentType = "application/json";
 
