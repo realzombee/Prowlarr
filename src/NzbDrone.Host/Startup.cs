@@ -103,6 +103,8 @@ namespace NzbDrone.Host
                 ? mega
                 : 100;
 
+            services.AddSingleton<IOutputCacheStore, SqliteOutputCacheStore>();
+
             services.AddOutputCache(options =>
             {
                 options.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(cacheTtl);
@@ -110,8 +112,6 @@ namespace NzbDrone.Host
                 options.AddPolicy("NewznabQuery", builder =>
                     builder.With(context => !IsRssRequest(context.HttpContext.Request)));
             });
-
-            services.AddSingleton<IOutputCacheStore, SqliteOutputCacheStore>();
 
             services
             .AddControllers(options =>
