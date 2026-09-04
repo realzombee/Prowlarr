@@ -110,12 +110,7 @@ jobs:
       - name: Compile Backend & Frontend Packages
         run: |
           ./build.sh --backend --frontend --packages -f "${{ env.FRAMEWORK }}" -r linux-musl-x64
-
-          if [ "${{ env.IS_PR }}" != "true" ]; then
-            ./build.sh --backend --frontend --packages -f "${{ env.FRAMEWORK }}" -r linux-musl-arm64
-          else
-            mkdir -p _artifacts/linux-musl-arm64/${{ env.FRAMEWORK }}/Prowlarr
-          fi
+          ./build.sh --backend --frontend --packages -f "${{ env.FRAMEWORK }}" -r linux-musl-arm64
         env:
           PROWLARRVERSION: ${{ steps.meta_env.outputs.VERSION }}
           BRANCH: ${{ env.BRANCH }}
@@ -151,7 +146,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          platforms: ${{ env.IS_PR == 'true' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          platforms: 'linux/amd64,linux/arm64'
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
