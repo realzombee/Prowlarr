@@ -1,0 +1,9 @@
+changelog:
+  exclude:
+    authors:
+      - Weblate
+      - ProwlarrBot
+  categories:
+    - title: Changes
+      labels:
+        - '*'

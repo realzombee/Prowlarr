@@ -15,7 +15,6 @@ prowlarr:
       - TZ=Etc/UTC
       # Configure caching behavior
       - CACHE_TTL_MINS=10
-      - CACHE_MAX_SIZE_MB=100
       - ENABLE_DOWNLOAD_CACHE=true
       - DOWNLOAD_CACHE_MAX_SIZE_MB=1000
     volumes:
@@ -35,8 +34,6 @@ This fork aims to improve certain aspects of Prowlarr to make it work better wit
 | Env Var           | Default | Description                                                                                            |
 |-------------------|---------|--------------------------------------------------------------------------------------------------------|
 | CACHE_TTL_MINS    | 10      | How long a particular query response should be cached for. RSS queries are not cached.                 |
-| CACHE_MAX_SIZE_MB | 100     | Maximum size of cache in memory before old records are cleaned up. Higher values will use more memory. |
-
 
 Debrid/Usenet mounting tools cause a lot of repeated queries to the indexer that waste time and API queries. In particular, the workflow for most Usenet streaming setups is:
 - Arrs search for an item
@@ -53,16 +50,10 @@ Generally, if you're using any of the streaming clients, this fork will give you
 WITH enriched AS (
     SELECT
         IndexerId,
-        json_extract(Data, '$.season') AS season,
-        json_extract(Data, '$.query') AS query,
-        json_extract(Data, '$.categories') AS categories,
-        json_extract(Data, '$.queryType') AS queryType,
-        json_extract(Data, '$.tvdbId') AS tvdbId,
-        json_extract(Data, '$.tmdbId') AS tmdbId,
-        json_extract(Data, '$.imdbId') AS imdbId,
+        json_extract(Data, '$.url') AS url,
         CAST(strftime('%s', date) / 600 AS INTEGER) AS window_id
     FROM History
-    WHERE date >= datetime('now', '-90 days') AND (EventType = 2 OR EventType = 3)
+    WHERE date >= datetime('now', '-90 days') AND EventType = 2
     ),
     grouped AS (
 SELECT
@@ -70,7 +61,7 @@ SELECT
     COUNT(*) - 1 AS duplicate_calls
 FROM enriched
 GROUP BY
-    IndexerId, season, query, categories, queryType, tvdbId, tmdbId, imdbId, window_id
+    IndexerId, url, window_id
     )
 SELECT
     SUM(total_calls) AS total_requests,
@@ -81,10 +72,10 @@ FROM grouped;
 
 ## Cache nzb/torrent files
 
-| Env Var                    | Default | Description                                                                                                                                                                                        |
-|----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ENABLE_DOWNLOAD_CACHE      | false   | Whether Prowlarr should download and cache nzb/torrent files                                                                                                                                       |
-| DOWNLOAD_CACHE_MAX_SIZE_MB | 1000    | Maximum size of download cache on disk. The cleanup job runs with the housekeeping tasks every 24 hours so this is not a strict limit. In testing, 1GB of disk cache stored ~6k nzbs. |
+| Env Var                    | Default | Description                                                                                                                                                                           |
+|----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ENABLE_DOWNLOAD_CACHE      | false   | Whether Prowlarr should download and cache nzb/torrent files                                                                                                                          |
+| DOWNLOAD_CACHE_MAX_SIZE_MB | 1000    | Maximum size of download cache on disk. The cleanup job runs with the housekeeping tasks every 24 hours so this is not a strict limit. In testing, 1GB of disk cache stored ~7k nzbs. |
 
 There is potential for download loops in arrs where the same release is re-downloaded repeatedly due to mismatches in the parsed release custom format score and custom format score after import. This problem gets exacerbated when you use tools like Newtarr/Houndarr/Huntarr/etc to automate searching.
 

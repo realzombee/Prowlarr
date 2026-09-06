@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Net.Http.Headers;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -23,6 +22,7 @@ using NzbDrone.Core.ThingiProvider.Status;
 using Prowlarr.Http.Extensions;
 using Prowlarr.Http.REST;
 using BadRequestException = NzbDrone.Core.Exceptions.BadRequestException;
+using HttpRequest = Microsoft.AspNetCore.Http.HttpRequest;
 
 namespace NzbDrone.Api.V1.Indexers
 {
@@ -37,7 +37,8 @@ namespace NzbDrone.Api.V1.Indexers
         private IIndexerStatusService _indexerStatusService;
         private IDownloadMappingService _downloadMappingService { get; set; }
         private IDownloadService _downloadService { get; set; }
-        private IDiskCacheService _diskCacheService { get; set; }
+        private QueryCacheService _queryCacheService { get; set; }
+        private IDownloadCacheService _downloadCacheService { get; set; }
         private readonly Logger _logger;
 
         public NewznabController(IndexerFactory indexerFactory,
@@ -46,7 +47,8 @@ namespace NzbDrone.Api.V1.Indexers
             IIndexerStatusService indexerStatusService,
             IDownloadMappingService downloadMappingService,
             IDownloadService downloadService,
-            IDiskCacheService diskCacheService,
+            IDownloadCacheService downloadCacheService,
+            QueryCacheService queryCacheService,
             Logger logger)
         {
             _indexerFactory = indexerFactory;
@@ -55,19 +57,52 @@ namespace NzbDrone.Api.V1.Indexers
             _indexerStatusService = indexerStatusService;
             _downloadMappingService = downloadMappingService;
             _downloadService = downloadService;
-            _diskCacheService = diskCacheService;
+            _downloadCacheService = downloadCacheService;
+            _queryCacheService = queryCacheService;
             _logger = logger;
+        }
+
+        private string BuildCacheKey()
+        {
+            return $"{Request.Path}{Request.QueryString}";
+        }
+
+        private static bool IsRssRequest(HttpRequest request)
+        {
+            var query = request.Query;
+            var requestType = query["t"].ToString();
+
+            if (requestType is not ("search" or "tvsearch" or "movie" or "music" or "book"))
+            {
+                return false;
+            }
+
+            string[] searchParams =
+            {
+                "q", "imdbid", "tmdbid", "tvdbid", "rid", "tvmazeid", "traktid", "doubanid",
+                "season", "ep", "album", "artist", "label", "track", "year", "genre",
+                "author", "title", "publisher"
+            };
+
+            return searchParams.All(param => string.IsNullOrWhiteSpace(query[param].ToString()));
         }
 
         [HttpGet("/api/v1/indexer/{id:int}/newznab")]
         [HttpGet("{id:int}/api")]
-        [OutputCache(PolicyName = "NewznabQuery")]
         public async Task<IActionResult> GetNewznabResponse(int id, [FromQuery] NewznabRequest request)
         {
             var requestType = request.t;
             request.source = Request.GetSource();
             request.server = Request.GetServerUrl();
             request.host = Request.GetHostName();
+
+            var cacheKey = BuildCacheKey();
+            var cachedBytes = await _queryCacheService.GetAsync(cacheKey);
+            if (cachedBytes != null)
+            {
+                var cachedXml = Encoding.UTF8.GetString(cachedBytes);
+                return CreateResponse(cachedXml);
+            }
 
             if (requestType.IsNullOrWhiteSpace())
             {
@@ -206,7 +241,14 @@ namespace NzbDrone.Api.V1.Indexers
 
                     var preferMagnetUrl = indexer.Protocol == DownloadProtocol.Torrent && indexerDef.Settings is ITorrentIndexerSettings torrentIndexerSettings && (torrentIndexerSettings.TorrentBaseSettings?.PreferMagnetUrl ?? false);
 
-                    return CreateResponse(results.ToXml(indexer.Protocol, preferMagnetUrl));
+                    var resultsXml = results.ToXml(indexer.Protocol, preferMagnetUrl);
+
+                    if (!IsRssRequest(Request))
+                    {
+                        await _queryCacheService.SetAsync(cacheKey, Encoding.UTF8.GetBytes(resultsXml));
+                    }
+
+                    return CreateResponse(resultsXml);
                 default:
                     return CreateResponse(CreateErrorXML(202, $"No such function ({requestType})"), statusCode: StatusCodes.Status400BadRequest);
             }
@@ -268,7 +310,7 @@ namespace NzbDrone.Api.V1.Indexers
                 throw new BadRequestException("Failed to normalize provided link");
             }
 
-            var enableDownloadCache = _diskCacheService.IsEnabled;
+            var enableDownloadCache = _downloadCacheService.IsEnabled;
 
             // If Indexer is set to download via Redirect then just redirect to the link unless it's a Usenet indexer at which point it forces Redirect.
             if (!enableDownloadCache)
@@ -289,7 +331,7 @@ namespace NzbDrone.Api.V1.Indexers
 
             if (enableDownloadCache)
             {
-                downloadBytes = await _diskCacheService.Get(unprotectedLink);
+                downloadBytes = await _downloadCacheService.Get(unprotectedLink);
             }
 
             if (downloadBytes == null)
@@ -300,7 +342,7 @@ namespace NzbDrone.Api.V1.Indexers
 
                     if (enableDownloadCache)
                     {
-                        await _diskCacheService.Store(unprotectedLink, downloadBytes, filename);
+                        await _downloadCacheService.Store(unprotectedLink, downloadBytes, filename);
                     }
                 }
                 catch (ReleaseUnavailableException ex)
